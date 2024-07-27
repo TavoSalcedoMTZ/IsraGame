@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class LevelManager : MonoBehaviour
     private Camera mainCamera;
     private float camHeight;
     public float margin = 5f;
+    public string gameOverSceneName = "GameOverScene"; // Nombre de la escena de Game Over
 
     void Start()
     {
@@ -21,6 +23,12 @@ public class LevelManager : MonoBehaviour
         {
             Destroy(player);
             Debug.Log("Game Over");
+            SceneLoad();
         }
+    }
+
+    void SceneLoad()
+    {
+        SceneManager.LoadScene(gameOverSceneName); 
     }
 }

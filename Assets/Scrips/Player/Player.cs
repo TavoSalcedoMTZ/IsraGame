@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,8 +9,8 @@ public class Player : MonoBehaviour
     public float speed = 5f;
     public float jumpForce = 10f;
     public int jumpNumber = 1;
-
-    // Añadir referencia al prefab de la plataforma
+    private Animator animator;
+    public TextMeshProUGUI textSaltos;
     public GameObject platformPrefab;
 
     private Camera mainCamera;
@@ -19,8 +20,8 @@ public class Player : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
 
-        // Obtener la cámara principal y sus dimensiones
         mainCamera = Camera.main;
         camHeight = 2f * mainCamera.orthographicSize;
         camWidth = camHeight * mainCamera.aspect;
@@ -36,9 +37,9 @@ public class Player : MonoBehaviour
         {
             rb.velocity = Vector2.up * jumpForce;
             jumpNumber--;
+            StartCoroutine(JumpAnimation());
         }
-
-        // Fijar la rotación del jugador en 0, 0, 0
+        textSaltos.text = jumpNumber.ToString();
         transform.rotation = Quaternion.identity;
     }
 
@@ -46,30 +47,33 @@ public class Player : MonoBehaviour
     {
         rb.velocity = Vector2.up * (Random.Range(3f, 7f));
         jumpNumber++;
+        StartCoroutine(JumpAnimation());
 
-        // Comprobar si el objeto con el que colisiona es una plataforma
         if (collision.gameObject.name.StartsWith("Platform"))
         {
-            // Referencia al prefab de la plataforma desde el objeto colisionado
             platformPrefab = collision.gameObject;
 
-            // Generar nueva plataforma dentro de los límites de la cámara y a la derecha del jugador
             float spawnX = Random.Range(transform.position.x + 5f, mainCamera.transform.position.x + camWidth / 2f + 10f);
             float spawnY = Random.Range(mainCamera.transform.position.y - camHeight / 2f, mainCamera.transform.position.y + camHeight / 2f);
             Vector2 newPosition = new Vector2(spawnX, spawnY);
 
             GameObject newPlatform = Instantiate(platformPrefab, newPosition, Quaternion.identity);
 
-            // Asegurar que la nueva plataforma tenga un BoxCollider2D activado
             BoxCollider2D collider = newPlatform.GetComponent<BoxCollider2D>();
             if (collider == null)
             {
                 collider = newPlatform.AddComponent<BoxCollider2D>();
             }
-            collider.enabled = true; // Activar el BoxCollider2D
+            collider.enabled = true;
 
-            // Destruir la plataforma original
             Destroy(collision.gameObject);
         }
+    }
+
+    private IEnumerator JumpAnimation()
+    {
+        animator.SetBool("isJumping", true);
+        yield return new WaitForSeconds(0.24f);
+        animator.SetBool("isJumping", false);
     }
 }
