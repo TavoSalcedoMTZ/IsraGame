@@ -12,10 +12,12 @@ public class Player : MonoBehaviour
     private Animator animator;
     public TextMeshProUGUI textSaltos;
     public GameObject platformPrefab;
+    public GameObject menuPanel; // Referencia al panel del menú
 
     private Camera mainCamera;
     private float camWidth;
     private float camHeight;
+    private bool isMenuActive = false; // Estado del menú
 
     void Start()
     {
@@ -25,10 +27,19 @@ public class Player : MonoBehaviour
         mainCamera = Camera.main;
         camHeight = 2f * mainCamera.orthographicSize;
         camWidth = camHeight * mainCamera.aspect;
+
+        menuPanel.SetActive(false); // Asegúrate de que el menú esté oculto al inicio
     }
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleMenu();
+        }
+
+        if (isMenuActive) return;
+
         float moveHorizontal = Input.GetAxis("Horizontal");
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, 0.0f);
         transform.position += movement * speed * Time.deltaTime;
@@ -75,5 +86,12 @@ public class Player : MonoBehaviour
         animator.SetBool("isJumping", true);
         yield return new WaitForSeconds(0.24f);
         animator.SetBool("isJumping", false);
+    }
+
+    public void ToggleMenu()
+    {
+        isMenuActive = !isMenuActive;
+        menuPanel.SetActive(isMenuActive);
+        Time.timeScale = isMenuActive ? 0 : 1; 
     }
 }

@@ -9,7 +9,7 @@ public class LevelManager : MonoBehaviour
     private Camera mainCamera;
     private float camHeight;
     public float margin = 5f;
-    public string gameOverSceneName = "GameOverScene"; // Nombre de la escena de Game Over
+    public string gameOverSceneName = "GameOverScene"; 
 
     void Start()
     {
@@ -22,7 +22,6 @@ public class LevelManager : MonoBehaviour
         if (player.transform.position.y < mainCamera.transform.position.y - camHeight / 2f - margin)
         {
             Destroy(player);
-            Debug.Log("Game Over");
             SceneLoad();
         }
     }
