@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Player : MonoBehaviour
 {
@@ -11,13 +12,15 @@ public class Player : MonoBehaviour
     public int jumpNumber = 1;
     private Animator animator;
     public TextMeshProUGUI textSaltos;
-    public GameObject platformPrefab;
     public GameObject menuPanel; // Referencia al panel del menú
 
     private Camera mainCamera;
     private float camWidth;
     private float camHeight;
     private bool isMenuActive = false; // Estado del menú
+    public GameManager gameManager; // Referencia al GameManager
+    public UnityEvent onPlayerDamaged; 
+    public UnityEvent jumpPlataform;
 
     void Start()
     {
@@ -56,28 +59,16 @@ public class Player : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        rb.velocity = Vector2.up * (Random.Range(3f, 7f));
+        if (collision.gameObject.CompareTag("Platform"))
+        {
+            rb.velocity = Vector2.up * (Random.Range(3f, 7f));
         jumpNumber++;
         StartCoroutine(JumpAnimation());
 
-        if (collision.gameObject.name.StartsWith("Platform"))
-        {
-            platformPrefab = collision.gameObject;
+            jumpPlataform.Invoke();
+           Destroy(collision.gameObject);
+           gameManager.contadorPlataformas--;
 
-            float spawnX = Random.Range(transform.position.x + 5f, mainCamera.transform.position.x + camWidth / 2f + 10f);
-            float spawnY = Random.Range(mainCamera.transform.position.y - camHeight / 2f, mainCamera.transform.position.y + camHeight / 2f);
-            Vector2 newPosition = new Vector2(spawnX, spawnY);
-
-            GameObject newPlatform = Instantiate(platformPrefab, newPosition, Quaternion.identity);
-
-            BoxCollider2D collider = newPlatform.GetComponent<BoxCollider2D>();
-            if (collider == null)
-            {
-                collider = newPlatform.AddComponent<BoxCollider2D>();
-            }
-            collider.enabled = true;
-
-            Destroy(collision.gameObject);
         }
     }
 
@@ -93,5 +84,15 @@ public class Player : MonoBehaviour
         isMenuActive = !isMenuActive;
         menuPanel.SetActive(isMenuActive);
         Time.timeScale = isMenuActive ? 0 : 1; 
+    }
+
+    public void DañoAJugador()
+    {
+        if (jumpNumber > 0)
+        {
+            jumpNumber--;
+        }
+        onPlayerDamaged.Invoke();
+        
     }
 }
